@@ -177,7 +177,7 @@ exports.destroy = async (req, res, next) => {
 
 
 // GET /quizzes/:quizId/check
-    exports.check = (req, res, next) => {
+    exports.check = async (req, res, next) => {
 
         const {query} = req;
         const {quiz} = req.load;
@@ -193,7 +193,7 @@ exports.destroy = async (req, res, next) => {
     };
 
 // GET /quizzes/randomPlay
-    exports.randomPlay = (req, res, next) => {
+    exports.randomPlay = async (req, res, next) => {
 
 		const total = await models.Quiz.count();
 		const quedan = total - req.session.randomPlayResolved.length;
