@@ -220,7 +220,7 @@ exports.destroy = async (req, res, next) => {
 			res.render('quizzes/random_play', {quiz, score});
 		}else {
 			delete req.session.randomPlay;
-			res.render('quizzes/random_nomore', score);
+			res.render('quizzes/random_nomore', {score});
 		}
     };
 
