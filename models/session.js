@@ -17,10 +17,10 @@ module.exports = (sequelize, DataTypes) => {
             },
             data: {
                 type: DataTypes.STRING(50000)
+            },
+            randomPlayResolved: {
+                type: DataTypes.ARRAY(1000)
             }
-            // randomPlayResolved: {
-            //     type: DataTypes.ARRAY(1000)
-            // }
         }, {
             sequelize
         }
