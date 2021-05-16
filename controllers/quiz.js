@@ -234,7 +234,7 @@ exports.destroy = async (req, res, next) => {
         const answer = req.query.answer || "";
         const result = answer.toLowerCase().trim() === req.load.quiz.answer.toLowerCase().trim();
 
-		const score = req.session.randomPlay.resolved.length;
+		let score = req.session.randomPlay.resolved.length;
 
 		if(result){
 			req.session.randomPlay.lastQuizId = 0;
