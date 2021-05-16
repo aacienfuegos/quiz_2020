@@ -63,7 +63,7 @@ router.get('/quizzes/:quizId(\\d+)/check', quizController.check);
 
 // Routes for random play
 router.get('/quizzes/randomplay', quizController.randomPlay);
-router.get('/quizzes/randomcheck/:quizId(\d+)', quizController.randomCheck);
+router.get('/quizzes/randomcheck/:quizId(\\d+)', quizController.randomCheck);
 
 
 module.exports = router;
