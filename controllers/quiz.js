@@ -194,44 +194,57 @@ exports.destroy = async (req, res, next) => {
 
 // GET /quizzes/randomPlay
     exports.randomPlay = async (req, res, next) => {
-		req.session.randomPlayResolved = req.session.randomPlayResolved || [];
-		const total = await models.Quiz.count();
-		const quedan = total - req.session.randomPlayResolved.length;
+		req.session.randomPlay = req.session.randomPlay || {
+			resolved: [],
+			lastQuizId: 0
+		};
 
-		try {
-		const quiz = await models.Quiz.findOne({
-		where: {'id': {[Sequelize.Op.notIn]: req.session.randomPlayResolved}},
-		offset: Math.floor(Math.random() * quedan)
-		});
-		} catch(error){
-			next(error);
+		let quiz;
+
+		if(req.session.randomPlay.lastQuizId){
+			quiz = await models.Quiz.findByPk(req.session.randomPlayLastQuiz);
+		} else {
+			const total = await models.Quiz.count();
+			const quedan = total - req.session.randomPlay.resolved.length;
+
+			quiz = await models.Quiz.findOne({
+			where: {'id': {[Sequelize.Op.notIn]: req.session.randomPlay.resolved}},
+			offset: Math.floor(Math.random() * quedan)
+			});
 		}
 
-        res.render('quizzes/random_play', quiz);
+		const score = req.session.randomPlay.resolved.length;
+
+		if(quiz){
+			req.session.randomPlay.lastQuizId = quiz.id;
+			res.render('quizzes/random_play', {quiz, score});
+		}else {
+			delete req.session.randomPlay;
+			res.render('quizzes/random_nomore', score);
+		}
     };
 
 // GET /quizzes/randomCheck
     exports.randomCheck = (req, res, next) => {
+		req.session.randomPlay = req.session.randomPlay || {
+			resolved: [],
+			lastQuizId: 0
+		};
 
-        const {query} = req;
-        const {quiz} = req.load;
-
-        const answer = query.answer || "";
-        const result = answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim();
+        const answer = req.query.answer || "";
+        const result = answer.toLowerCase().trim() === req.load.quiz.answer.toLowerCase().trim();
 
 		if(result){
-			if(req.session.randomPlayResolved[req.session.randomPlayResolved.length - 1] == quiz.id) return;
-			req.session.randomPlayResolved.push(quiz.id);
+			req.session.randomPlay.lastQuizId = 0;
+			req.session.randomPlay.resolved.push(req.load.quiz.id);
 
+			const score = req.session.randomPlay.resolved.length;
+
+			res.render('quizzes/random_result', {result, answer, score});
 		} else {
-			req.session.randomPlayResolved.destroy();
+			delete req.session.randomPlay;
+			res.render('quizzes/random_result', {result, answer, score});
 		}
 
-		let score = req.session.randomPlayResolved.length;
-		res.render('quizzes/random_result', {
-			result,
-			answer,
-			score
-		});
 
     };
