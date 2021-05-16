@@ -194,16 +194,20 @@ exports.destroy = async (req, res, next) => {
 
 // GET /quizzes/randomPlay
     exports.randomPlay = async (req, res, next) => {
-
+		req.session.randomPlayResolved = req.session.randomPlayResolved || [];
 		const total = await models.Quiz.count();
 		const quedan = total - req.session.randomPlayResolved.length;
 
+		try {
 		const quiz = await models.Quiz.findOne({
 		where: {'id': {[Sequelize.Op.notIn]: req.session.randomPlayResolved}},
 		offset: Math.floor(Math.random() * quedan)
 		});
+		} catch(error){
+			next(error);
+		}
 
-        res.render('quizzes/randomplay', quiz);
+        res.render('quizzes/random_play', quiz);
     };
 
 // GET /quizzes/randomCheck
