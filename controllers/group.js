@@ -115,39 +115,48 @@ exports.destroy = async (req, res, next) => {
 
 // GET /quizzes/randomPlay
 exports.randomPlay = async (req, res, next) => {
-		req.session.randomPlay = req.session.randomPlay || {
+	try{
+	const group = req.load.group;
+		req.session.randomPlay = req.session.randomPlay || {};
+		req.session.randomPlay[group.id] = req.session.randomPlay[group.id] || {
 			resolved: [],
 			lastQuizId: 0
 		};
 
 		let quiz;
 
-		if(req.session.randomPlay.lastQuizId){
-			quiz = await models.Quiz.findByPk(req.session.randomPlayLastQuiz);
+		if(req.session.randomPlay[group.id].lastQuizId){
+			quiz = await models.Quiz.findByPk(req.session.randomPlayLastQuiz[group.id].lastQuizId);
 		} else {
-			const total = await models.Quiz.count();
-			const quedan = total - req.session.randomPlay.resolved.length;
+			const total = await group.countQuizzes();
+			const quedan = total - req.session.randomPlay[group.id].resolved.length;
 
 			quiz = await models.Quiz.findOne({
-			where: {'id': {[Sequelize.Op.notIn]: req.session.randomPlay.resolved}},
-			offset: Math.floor(Math.random() * quedan)
+				where: {'id': {[Sequelize.Op.notIn]: req.session.randomPlay[group.id].resolved}},
+				include: [{model: models.Group, as: "groups", where: { id: group.id}}],
+				offset: Math.floor(Math.random() * quedan)
 			});
 		}
 
-		const score = req.session.randomPlay.resolved.length;
+		const score = req.session.randomPlay[group.id].resolved.length;
 
 		if(quiz){
-			req.session.randomPlay.lastQuizId = quiz.id;
-			res.render('groups/random_play', {quiz, score});
+			req.session.randomPlay[group.id].lastQuizId = quiz.id;
+			res.render('groups/random_play', {group, quiz, score});
 		}else {
-			delete req.session.randomPlay;
-			res.render('groups/random_nomore', {score});
+			delete req.session.randomPlay[group.id];
+			res.render('groups/random_nomore', {group, score});
 		}
+	} catch (error) {
+		next(error);
+	}
 };
 
 // GET /quizzes/randomCheck
 exports.randomCheck = (req, res, next) => {
-		req.session.randomPlay = req.session.randomPlay || {
+	const group = req.load.group;
+		req.session.randomPlay = req.session.randomPlay || {};
+		req.session.randomPlay[group.id] = req.session.randomPlay[group.id] || {
 			resolved: [],
 			lastQuizId: 0
 		};
@@ -155,18 +164,18 @@ exports.randomCheck = (req, res, next) => {
         const answer = req.query.answer || "";
         const result = answer.toLowerCase().trim() === req.load.quiz.answer.toLowerCase().trim();
 
-		let score = req.session.randomPlay.resolved.length;
+		let score = req.session.randomPlay[group.id].resolved.length;
 
 		if(result){
-			req.session.randomPlay.lastQuizId = 0;
-			req.session.randomPlay.resolved.push(req.load.quiz.id);
+			req.session.randomPlay[group.id].lastQuizId = 0;
+			req.session.randomPlay[group.id].resolved.push(req.load.quiz.id);
 
-			score = req.session.randomPlay.resolved.length;
+			score = req.session.randomPlay[group.id].resolved.length;
 
-			res.render('groups/random_result', {result, answer, score});
+			res.render('groups/random_result', {group, result, answer, score});
 		} else {
-			delete req.session.randomPlay;
-			res.render('groups/random_result', {result, answer, score});
+			delete req.session.randomPlay[group.id];
+			res.render('groups/random_result', {group, result, answer, score});
 		}
 
 
