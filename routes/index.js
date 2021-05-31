@@ -4,6 +4,7 @@ var router = express.Router();
 const quizController = require('../controllers/quiz');
 const userController = require('../controllers/user');
 const sessionController = require('../controllers/session');
+const groupController = require('../controllers/group');
 
 //-----------------------------------------------------------
 
@@ -86,7 +87,8 @@ router.get(
         '/',
         '/author',
         '/users',
-        '/quizzes'
+        '/quizzes',
+        '/groups'
     ],
     saveBack);
 
@@ -177,5 +179,25 @@ router.delete('/quizzes/:quizId(\\d+)',
 router.get('/quizzes/:quizId(\\d+)/play',  quizController.play);
 router.get('/quizzes/:quizId(\\d+)/check', quizController.check);
 
+// Autoload for routes using :groupId
+router.param('groupId', groupController.load);
+
+// Routes for the resource /groups
+router.get('/groups',
+    groupController.index);
+router.get('/groups/new',
+    groupController.new);
+router.post('/groups',
+    groupController.create);
+router.get('/groups/:groupId(\\d+)/edit',
+    groupController.edit);
+router.put('/groups/:groupId(\\d+)',
+    groupController.update);
+router.delete('/groups/:groupId(\\d+)',
+    groupController.destroy);
+
+// Routes for random play
+router.get('/groups/:groupId(\\d+)/randomplay',  groupController.randomPlay);
+router.get('/groups/:groupId(\\d+)/randomcheck/:quizId(\\d+)', groupController.randomCheck);
 
 module.exports = router;
