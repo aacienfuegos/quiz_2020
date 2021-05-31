@@ -50,7 +50,7 @@ exports.create = async (req, res, next) => {
         // Saves only the field name into the DDBB
         group = await group.save({fields: ["name"]});
         req.flash('success', 'Group created successfully.');
-        res.redirect('/groups/' + group.id);
+        res.redirect('/groups');
     } catch (error) {
         if (error instanceof Sequelize.ValidationError) {
             req.flash('error', 'There are errors in the form:');
