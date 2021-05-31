@@ -138,10 +138,10 @@ exports.randomPlay = async (req, res, next) => {
 
 		if(quiz){
 			req.session.randomPlay.lastQuizId = quiz.id;
-			res.render('quizzes/random_play', {quiz, score});
+			res.render('groups/random_play', {quiz, score});
 		}else {
 			delete req.session.randomPlay;
-			res.render('quizzes/random_nomore', {score});
+			res.render('groups/random_nomore', {score});
 		}
 };
 
@@ -163,10 +163,10 @@ exports.randomCheck = (req, res, next) => {
 
 			score = req.session.randomPlay.resolved.length;
 
-			res.render('quizzes/random_result', {result, answer, score});
+			res.render('groups/random_result', {result, answer, score});
 		} else {
 			delete req.session.randomPlay;
-			res.render('quizzes/random_result', {result, answer, score});
+			res.render('groups/random_result', {result, answer, score});
 		}
 
 
