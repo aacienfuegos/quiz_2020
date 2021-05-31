@@ -7,6 +7,8 @@
             <td>
                 <a href="/groups/<%= group.id %>/randomplay"><%= group.name %></a>
             </td>
+
+			<% if (locals.loginUser && locals.loginUser.isAdmin) { %>
             <td>
                 <a href="/groups/<%= group.id %>/edit" class="button">Edit</a>
             </td>
@@ -15,8 +17,12 @@
                    onClick="return confirm('Delete: <%= group.name %>');"
                    class="button">Delete</a>
             </td>
+			<% } %>
+
         </tr>
     <% } %>
 </table>
 
+<% if (locals.loginUser && locals.loginUser.isAdmin) { %>
 <a href="/groups/new" class="button">Create New Group</a>
+<% } %>
