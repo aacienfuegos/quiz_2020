@@ -25,5 +25,22 @@ sequelize.import(path.join(__dirname,'session'));
 User.hasMany(Quiz, {as: 'quizzes', foreignKey: 'authorId'});
 Quiz.belongsTo(User, {as: 'author', foreignKey: 'authorId'});
 
+// Group
+const Group = sequelize.import(path.join(__dirname, 'group'));
+
+// Relation N-to-N between Quiz and Group:
+Quiz.belongsToMany(Group, {
+    as: 'groups',
+    through: 'GroupQuizzes',
+    foreignKey: 'quizId',
+    otherKey: 'groupId'
+});
+
+Group.belongsToMany(Quiz, {
+    as: 'quizzes',
+    through: 'GroupQuizzes',
+    foreignKey: 'groupId',
+    otherKey: 'quizId'
+});
 
 module.exports = sequelize;
